@@ -4,7 +4,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "C:/Users/molte/OneDrive/Desktop/Master year 1/Semester 1/Advanced Operating Systems (NOS)/Legion16/main.cpp" "C:/Users/molte/OneDrive/Desktop/Master year 1/Semester 1/Advanced Operating Systems (NOS)/Legion16/cmake-build-debug/CMakeFiles/Legion16.dir/main.cpp.obj"
+  "C:/Users/User/Desktop/Legion16/main.cpp" "C:/Users/User/Desktop/Legion16/cmake-build-debug/CMakeFiles/Legion16.dir/main.cpp.obj"
   )
 set(CMAKE_CXX_COMPILER_ID "MSVC")
 

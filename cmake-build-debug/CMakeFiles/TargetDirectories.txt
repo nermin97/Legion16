@@ -1,3 +1,3 @@
-C:/Users/molte/OneDrive/Desktop/Master year 1/Semester 1/Advanced Operating Systems (NOS)/Legion16/cmake-build-debug/CMakeFiles/edit_cache.dir
-C:/Users/molte/OneDrive/Desktop/Master year 1/Semester 1/Advanced Operating Systems (NOS)/Legion16/cmake-build-debug/CMakeFiles/Legion16.dir
-C:/Users/molte/OneDrive/Desktop/Master year 1/Semester 1/Advanced Operating Systems (NOS)/Legion16/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+C:/Users/User/Desktop/Legion16/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/User/Desktop/Legion16/cmake-build-debug/CMakeFiles/Legion16.dir
+C:/Users/User/Desktop/Legion16/cmake-build-debug/CMakeFiles/rebuild_cache.dir

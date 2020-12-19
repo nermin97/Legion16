@@ -39,19 +39,19 @@ NULL=nul
 SHELL = cmd.exe
 
 # The CMake executable.
-CMAKE_COMMAND = "C:\Program Files\JetBrains\CLion 2020.2.4\bin\cmake\win\bin\cmake.exe"
+CMAKE_COMMAND = "C:\Program Files\JetBrains\CLion 2020.3\bin\cmake\win\bin\cmake.exe"
 
 # The command to remove a file.
-RM = "C:\Program Files\JetBrains\CLion 2020.2.4\bin\cmake\win\bin\cmake.exe" -E rm -f
+RM = "C:\Program Files\JetBrains\CLion 2020.3\bin\cmake\win\bin\cmake.exe" -E rm -f
 
 # Escaping for special characters.
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = "C:\Users\molte\OneDrive\Desktop\Master year 1\Semester 1\Advanced Operating Systems (NOS)\Legion16"
+CMAKE_SOURCE_DIR = C:\Users\User\Desktop\Legion16
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = "C:\Users\molte\OneDrive\Desktop\Master year 1\Semester 1\Advanced Operating Systems (NOS)\Legion16\cmake-build-debug"
+CMAKE_BINARY_DIR = C:\Users\User\Desktop\Legion16\cmake-build-debug
 
 #=============================================================================
 # Directory level rules for the build root directory
@@ -78,14 +78,14 @@ clean: CMakeFiles\Legion16.dir\clean
 CMakeFiles\Legion16.dir\all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\Legion16.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\Legion16.dir\depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\Legion16.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\Legion16.dir\build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir="C:\Users\molte\OneDrive\Desktop\Master year 1\Semester 1\Advanced Operating Systems (NOS)\Legion16\cmake-build-debug\CMakeFiles" --progress-num=1,2 "Built target Legion16"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=C:\Users\User\Desktop\Legion16\cmake-build-debug\CMakeFiles --progress-num=1,2 "Built target Legion16"
 .PHONY : CMakeFiles\Legion16.dir\all
 
 # Build rule for subdir invocation for target.
 CMakeFiles\Legion16.dir\rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start "C:\Users\molte\OneDrive\Desktop\Master year 1\Semester 1\Advanced Operating Systems (NOS)\Legion16\cmake-build-debug\CMakeFiles" 2
+	$(CMAKE_COMMAND) -E cmake_progress_start C:\Users\User\Desktop\Legion16\cmake-build-debug\CMakeFiles 2
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 /nologo -$(MAKEFLAGS) CMakeFiles\Legion16.dir\all
-	$(CMAKE_COMMAND) -E cmake_progress_start "C:\Users\molte\OneDrive\Desktop\Master year 1\Semester 1\Advanced Operating Systems (NOS)\Legion16\cmake-build-debug\CMakeFiles" 0
+	$(CMAKE_COMMAND) -E cmake_progress_start C:\Users\User\Desktop\Legion16\cmake-build-debug\CMakeFiles 0
 .PHONY : CMakeFiles\Legion16.dir\rule
 
 # Convenience name for target.

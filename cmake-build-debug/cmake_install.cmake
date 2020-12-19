@@ -1,4 +1,4 @@
-# Install script for directory: C:/Users/molte/OneDrive/Desktop/Master year 1/Semester 1/Advanced Operating Systems (NOS)/Legion16
+# Install script for directory: C:/Users/User/Desktop/Legion16
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -40,5 +40,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "C:/Users/molte/OneDrive/Desktop/Master year 1/Semester 1/Advanced Operating Systems (NOS)/Legion16/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "C:/Users/User/Desktop/Legion16/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
