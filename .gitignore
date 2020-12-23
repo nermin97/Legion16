@@ -33,6 +33,7 @@
 
 # CMAKE build debug
 cmake-build-debug
+CMakeLists.txt
 
 # idea
 .idea
