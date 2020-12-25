@@ -18,7 +18,12 @@
 
 using namespace std;
 
-unsigned short int memory[65536]={0x0000}, registers[16], noOfInstructions; // regs[15] je PC
+struct instruction {
+    std::string opcode = "";
+    unsigned short int dest = 0x0000, src1 = 0x0000, src2 = 0x0000;
+} code[65536];
+
+unsigned short int memory[65536]={0x0000}, registers[16], numberOfInstructions; // regs[15] je PC
 int fileModes[16], openModes[16], lseekpos[16], fd;
 
 void populateOpenModes(){
@@ -68,7 +73,7 @@ void populateFileModes(){
 
 void settingRegistersToZero() {
     // Setting registers to zero
-    // registers[15] is PC=Program counter register
+    // registers[15] is PC(Program counter) register
     for(int i = 0; i < 16; i++)
         registers[i] = 0;
 }
@@ -93,6 +98,7 @@ void populateLseeekPos(){
 }
 
 void emulate() {
+    // nece trebati switch
     int i = 0;
     unsigned short int opcode, r, n, k;
     bool r1, n1;
@@ -106,52 +112,50 @@ void emulate() {
         default:
             cout << "nije to to, u default smo" << std::endl;
     }
-//    opcode
-//    cout << mem << std::endl;
 }
+
+//std::string decideRoutine(unsigned short int opcode) {
+//    switch(opcode & 0xF000) {
+//        case 0x0000:
+//            return "0000";
+//            break;
+//        case 0x1000:
+//            return "0001";
+//            break;
+//    }
+//}
 
 void generateInstructionsRandomly () {
-    // We use this to generate random instructions and number of instructions
+    // We need here code for specific opcode, dest, src1 and src2
+    // Used to generate random instructions and a random number of those
+
+    // instr format OP|DEST|SRC1|SRC2
+    cout << " da probam jos nesto " << ((65535) & 0x000F) <<" primjer hex instr " << std::hex << 65535 << " pomjereno do prvog " << ((0xFABC) & 0x000F) << std::endl;
+//    (65535 & 0xF000) dobijanje prvog opcode
+//    ((0xFABC) & 0x000F) src2
+//    ((0xFABC >> 8) & 0x000F) dest
+//    ((0xFABC >> 4) & 0x000F) src1
     srand (time(NULL));
-    unsigned short int numberOfInstructions = rand() % 1000 + 100;
 
-    for(int i = 0; i < numberOfInstructions; ++i)
-        memory[i] = rand() % 65536 + 0;
-//    cout << "prvi " << memory[0] << " broj inst " << numberOfInstructions << std::endl;
+    numberOfInstructions = rand() % 1000 + 100;
 
-//    mem
-//    cout << instruction << " int verzija" << std::hex << instruction << " instrukcija" << std::endl;
-}
-
-void loadInstructions() {
-    std::fstream memFile;
-    memFile.open("memory.txt", std::fstream::in|std::fstream::out);
-    if(memFile.is_open()) cout << "otvorilo se" << std::endl;
-    unsigned short int instr;
-    // mem[0] = {nesto} stavlja sve vrijednosti na to
-//    mem[0] = 0x916e;
-//    cout << "vrijednost " << mem[0] << std::hex << mem[0] << std::endl;
-//    while(memFile >> std::hex >> instr) {
-//        cout << std::hex << instr;
-//        mem[noOfInstructions] = instr;
-//        noOfInstructions++;
-//    }
-
+    for(int i = 0; i < numberOfInstructions; ++i) {
+        memory[i] = rand() % 65536;
+        code[i].opcode = "ROUTINE" + to_string(memory[i] & 0xF000);
+        code[i].dest = (memory[i] >> 8) & 0x000F;
+        code[i].src1 = (memory[i] >> 4) & 0x000F;
+        code[i].src2 = memory[i] & 0x000F;
+    }
 }
 
 int main() {
-
+//    settingRegistersToZero();
 //    populateOpenModes();
 //    populateLseeekPos();
 //    populateFileModes();
-//    setRegsToZero(); //PC postavimo na nultu poziciju
-//    loadInstructions(); //Očitavamo instrukcije iz mem.txt
-//
-//    interpret();
-//    loadInstructions();
-//    generateInstructionsRandomly();
-    emulate();
     generateInstructionsRandomly();
+//    emulate();
+
 //    std::cout << "Emulation finished!" << std::endl;
     return 0;
 }
