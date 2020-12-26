@@ -19,8 +19,10 @@
 using namespace std;
 
 struct instruction {
-    std::string opcode = "";
-    unsigned short int dest = 0x0000, src1 = 0x0000, src2 = 0x0000;
+    std::string opcode1 = "";
+    void* opcode2;
+    unsigned short int src2 = 0x0000, opcode = 0x0000;
+    unsigned char dest, src1;
 } code[65536];
 
 unsigned short int memory[65536]={0x0000}, registers[16], numberOfInstructions; // regs[15] je PC
@@ -99,38 +101,42 @@ void populateLseeekPos(){
 
 void emulate() {
     // nece trebati switch
-    int i = 0;
-    unsigned short int opcode, r, n, k;
-    bool r1, n1;
-    memory[0] = 366;
-    opcode = memory[0];
+//    int i = 0;
+//    unsigned short int opcode, r, n, k;
+//    bool r1, n1;
+//    memory[0] = 366;
+//    opcode = memory[0];
 
-    switch(opcode & 0xF000) {
+//    switch(opcode & 0xF000) {
+//        case 0x0000:
+//            cout << "jeste, tu smo stigli " << std::endl;
+//            break;
+//        default:
+//            cout << "nije to to, u default smo" << std::endl;
+//    }
+
+
+    BLA:
+
+    EXIT:
+        memory[65536] = {0x0000};
+}
+
+void decideRoutine(unsigned short int mem, int i) {
+    switch(mem & 0xF000) {
         case 0x0000:
-            cout << "jeste, tu smo stigli " << std::endl;
-            break;
-        default:
-            cout << "nije to to, u default smo" << std::endl;
+            code[i].opcode2 = &&LOD;
     }
 }
 
-//std::string decideRoutine(unsigned short int opcode) {
-//    switch(opcode & 0xF000) {
-//        case 0x0000:
-//            return "0000";
-//            break;
-//        case 0x1000:
-//            return "0001";
-//            break;
-//    }
-//}
-
+// PREBACITI OVO SVE U emulate()
 void generateInstructionsRandomly () {
     // We need here code for specific opcode, dest, src1 and src2
     // Used to generate random instructions and a random number of those
 
+    // This won't work exactly because we need to watch out for instruction forms that don't match any appropriate specific instruction format, maybe we will have to manually prepare it
     // instr format OP|DEST|SRC1|SRC2
-    cout << " da probam jos nesto " << ((65535) & 0x000F) <<" primjer hex instr " << std::hex << 65535 << " pomjereno do prvog " << ((0xFABC) & 0x000F) << std::endl;
+//    cout << " da probam jos nesto " << ((65535) & 0x000F) <<" primjer hex instr " << std::hex << 65535 << " pomjereno do prvog " << ((0xFABC) & 0x000F) << std::endl;
 //    (65535 & 0xF000) dobijanje prvog opcode
 //    ((0xFABC) & 0x000F) src2
 //    ((0xFABC >> 8) & 0x000F) dest
@@ -138,10 +144,10 @@ void generateInstructionsRandomly () {
     srand (time(NULL));
 
     numberOfInstructions = rand() % 1000 + 100;
-
     for(int i = 0; i < numberOfInstructions; ++i) {
         memory[i] = rand() % 65536;
-        code[i].opcode = "ROUTINE" + to_string(memory[i] & 0xF000);
+//        code[i].opcode1 = "ROUTINE" + to_string(memory[i] & 0xF000);
+        decideRoutine(memory[i], i);
         code[i].dest = (memory[i] >> 8) & 0x000F;
         code[i].src1 = (memory[i] >> 4) & 0x000F;
         code[i].src2 = memory[i] & 0x000F;
