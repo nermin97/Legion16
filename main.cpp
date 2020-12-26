@@ -19,9 +19,8 @@
 using namespace std;
 
 struct instruction {
-    std::string opcode1 = "";
-    void* opcode2;
-    unsigned short int src2 = 0x0000, opcode = 0x0000;
+    void* opcode;
+    unsigned short int src2 = 0x0000;
     unsigned char dest, src1;
 } code[65536];
 
@@ -100,37 +99,6 @@ void populateLseeekPos(){
 }
 
 void emulate() {
-    // nece trebati switch
-//    int i = 0;
-//    unsigned short int opcode, r, n, k;
-//    bool r1, n1;
-//    memory[0] = 366;
-//    opcode = memory[0];
-
-//    switch(opcode & 0xF000) {
-//        case 0x0000:
-//            cout << "jeste, tu smo stigli " << std::endl;
-//            break;
-//        default:
-//            cout << "nije to to, u default smo" << std::endl;
-//    }
-
-
-    BLA:
-
-    EXIT:
-        memory[65536] = {0x0000};
-}
-
-void decideRoutine(unsigned short int mem, int i) {
-    switch(mem & 0xF000) {
-        case 0x0000:
-            code[i].opcode2 = &&LOD;
-    }
-}
-
-// PREBACITI OVO SVE U emulate()
-void generateInstructionsRandomly () {
     // We need here code for specific opcode, dest, src1 and src2
     // Used to generate random instructions and a random number of those
 
@@ -146,13 +114,134 @@ void generateInstructionsRandomly () {
     numberOfInstructions = rand() % 1000 + 100;
     for(int i = 0; i < numberOfInstructions; ++i) {
         memory[i] = rand() % 65536;
-//        code[i].opcode1 = "ROUTINE" + to_string(memory[i] & 0xF000);
-        decideRoutine(memory[i], i);
+
+        // decide what routine it is to which to jump
+        switch(memory[i] & 0xF000) {
+            case 0x0000:
+                code[i].opcode = &&LOD;
+                break;
+            case 0x0001:
+                code[i].opcode = &&ADD;
+                break;
+            case 0x0010:
+                code[i].opcode = &&SUB;
+                break;
+            case 0x0011:
+                code[i].opcode = &&AND;
+                break;
+            case 0x0100:
+                code[i].opcode = &&ORA;
+                break;
+            case 0x0101:
+                code[i].opcode = &&XOR;
+                break;
+            case 0x0110:
+                code[i].opcode = &&SHR;
+                break;
+            case 0x0111:
+                code[i].opcode = &&MUL;
+                break;
+            case 0x1000:
+                code[i].opcode = &&STO;
+                break;
+            case 0x1001:
+                code[i].opcode = &&LDC;
+                break;
+            case 0x1010:
+                code[i].opcode = &&GTU;
+                break;
+            case 0x1011:
+                code[i].opcode = &&GTS;
+                break;
+            case 0x1100:
+                code[i].opcode = &&LTU;
+                break;
+            case 0x1101:
+                code[i].opcode = &&LTS;
+                break;
+            case 0x1110:
+                code[i].opcode = &&EQU;
+                break;
+            case 0x1111:
+                code[i].opcode = &&MAJ;
+                break;
+        }
+
         code[i].dest = (memory[i] >> 8) & 0x000F;
         code[i].src1 = (memory[i] >> 4) & 0x000F;
         code[i].src2 = memory[i] & 0x000F;
     }
+
+    unsigned int TPC = 0, SPC = 0;
+    unsigned char RT, RA;
+    // Here are our routines defined
+    LOD:
+        registers[code[TPC].dest] = code[TPC].src2;
+    ADD:
+
+    SUB:
+
+    AND:
+
+    ORA:
+
+    XOR:
+
+    SHR:
+
+    MUL:
+
+    STO:
+
+    LDC:
+
+    GTU:
+
+    GTS:
+
+    LTU:
+
+    LTS:
+
+    EQU:
+
+    MAJ:
+
+    EXIT:
+        memory[65536] = {0x0000};
 }
+
+//void decideRoutine(unsigned short int mem, int i) {
+//    switch(mem & 0xF000) {
+//        case 0x0000:
+//            code[i].opcode2 = &&LOD;
+//    }
+//}
+//
+//// PREBACITI OVO SVE U emulate()
+//void generateInstructionsRandomly () {
+//    // We need here code for specific opcode, dest, src1 and src2
+//    // Used to generate random instructions and a random number of those
+//
+//    // This won't work exactly because we need to watch out for instruction forms that don't match any appropriate specific instruction format, maybe we will have to manually prepare it
+//    // instr format OP|DEST|SRC1|SRC2
+////    cout << " da probam jos nesto " << ((65535) & 0x000F) <<" primjer hex instr " << std::hex << 65535 << " pomjereno do prvog " << ((0xFABC) & 0x000F) << std::endl;
+////    (65535 & 0xF000) dobijanje prvog opcode
+////    ((0xFABC) & 0x000F) src2
+////    ((0xFABC >> 8) & 0x000F) dest
+////    ((0xFABC >> 4) & 0x000F) src1
+//    srand (time(NULL));
+//
+//    numberOfInstructions = rand() % 1000 + 100;
+//    for(int i = 0; i < numberOfInstructions; ++i) {
+//        memory[i] = rand() % 65536;
+////        code[i].opcode1 = "ROUTINE" + to_string(memory[i] & 0xF000);
+//        decideRoutine(memory[i], i);
+//        code[i].dest = (memory[i] >> 8) & 0x000F;
+//        code[i].src1 = (memory[i] >> 4) & 0x000F;
+//        code[i].src2 = memory[i] & 0x000F;
+//    }
+//}
 
 int main() {
 //    settingRegistersToZero();
