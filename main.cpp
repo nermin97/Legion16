@@ -24,7 +24,7 @@ struct instruction {
     unsigned char dest, src1;
 } code[65536];
 
-unsigned short int memory[65536]={0x0000}, registers[16], numberOfInstructions; // regs[15] je PC
+unsigned short int TPC = 0, SPC = 0, memory[65536]={0x0000}, registers[16], numberOfInstructions; // regs[15] je PC
 int fileModes[16], openModes[16], lseekpos[16], fd;
 
 void populateOpenModes(){
@@ -79,41 +79,88 @@ void settingRegistersToZero() {
         registers[i] = 0;
 }
 
-void populateLseeekPos(){
-    lseekpos[0] = 0; //SEEK_SET
-    lseekpos[1] = 1;//SEEK_CUR
-    lseekpos[2] = 2;//SEEK_END
-    lseekpos[3] = 0;
-    lseekpos[4] = 0;
-    lseekpos[5] = 0;
-    lseekpos[6] = 0;
-    lseekpos[7] = 0;
-    lseekpos[8] = 0;
-    lseekpos[9] = 0;
-    lseekpos[10] = 0;
-    lseekpos[11] = 0;
-    lseekpos[12] = 0;
-    lseekpos[13] = 0;
-    lseekpos[14] = 0;
-    lseekpos[15] = 0;
+bool increaseProgramCountersAndCheckIfEXIT() {
+    SPC += 4;
+    TPC++;
+    if(TPC >= numberOfInstructions)
+        return true;
+    return false;
+}
+
+std::string readFromMemory(int address, int numberOfBytes = 0) {
+    std::string name = "";
+    //Provjeriti uslove
+    char firstCharacter = (0x00);
+    char secondCharacter = (0x00);
+    int charactersRead = 0;
+
+    do {
+        auto value = memory[address];
+        firstCharacter = char((value >> 8) & 0x00FF);
+        secondCharacter = char(value & 0x00FF);
+
+        if(firstCharacter != (0x00)) {
+            charactersRead++;
+            if(numberOfBytes != 0 && charactersRead > numberOfBytes) break;
+            name += firstCharacter;
+
+            if(secondCharacter != (0x00)) {
+                charactersRead++;
+                if(numberOfBytes != 0 && charactersRead > numberOfBytes) break;
+            }
+            name += secondCharacter;
+        }
+        address++;
+    } while(firstCharacter != (0x00));
+
+    return name;
+}
+
+void writeToMemory(int whereToWrite, std::string stringToWrite, int numberOfBytes = 0) {
+
+    if(numberOfBytes > stringToWrite.size())
+        return;
+
+    unsigned int size = stringToWrite.size();
+    bool controlVariable = false;
+    if(numberOfBytes != 0) {
+        size = numberOfBytes;
+        if(numberOfBytes % 2 != 0) {
+            controlVariable = true;
+            size++;
+        }
+    }
+
+    for(unsigned int i = 0; i < size; ++i) {
+        short int twoChars = (char(stringToWrite[i]) << 8);
+
+        if(i == size - 1 && controlVariable) {
+            memory[whereToWrite] = twoChars;
+            break;
+        }
+
+        if((i + 1) < size) {
+            twoChars =  (twoChars | char(stringToWrite[i+1]));
+            i++;
+        }
+
+        memory[whereToWrite] = twoChars;
+        if((i + 1) < size)
+            whereToWrite++;
+    }
+    if(size % 2 != 0 || controlVariable)
+        memory[whereToWrite] = memory[whereToWrite] & 0xFF00;
+    else
+        memory[++whereToWrite] = 0x0000;
 }
 
 void emulate() {
     // Program counters
-    unsigned int TPC = 0, SPC = 0;
-    unsigned char RT, RA;
-    unsigned short int r, n, k;
+    unsigned short int r, n, k, temporarySRC2;
     bool rBOOL, nBOOL;
+    std::string stringForWriting = "";
     // We need here code for specific opcode, dest, src1 and src2
     // Used to generate random instructions and a random number of those
-
-    // This won't work exactly because we need to watch out for instruction forms that don't match any appropriate specific instruction format, maybe we will have to manually prepare it
-    // instr format OP|DEST|SRC1|SRC2
-//    cout << " da probam jos nesto " << ((65535) & 0x000F) <<" primjer hex instr " << std::hex << 65535 << " pomjereno do prvog " << ((0xFABC) & 0x000F) << std::endl;
-//    (65535 & 0xF000) dobijanje prvog opcode
-//    ((0xFABC) & 0x000F) src2
-//    ((0xFABC >> 8) & 0x000F) dest
-//    ((0xFABC >> 4) & 0x000F) src1
     srand (time(NULL));
 
     numberOfInstructions = rand() % 1000 + 100;
@@ -125,49 +172,49 @@ void emulate() {
             case 0x0000:
                 code[i].opcode = &&LOD;
                 break;
-            case 0x0001:
+            case 0x1000:
                 code[i].opcode = &&ADD;
                 break;
-            case 0x0010:
+            case 0x2000:
                 code[i].opcode = &&SUB;
                 break;
-            case 0x0011:
+            case 0x3000:
                 code[i].opcode = &&AND;
                 break;
-            case 0x0100:
+            case 0x4000:
                 code[i].opcode = &&ORA;
                 break;
-            case 0x0101:
+            case 0x5000:
                 code[i].opcode = &&XOR;
                 break;
-            case 0x0110:
+            case 0x6000:
                 code[i].opcode = &&SHR;
                 break;
-            case 0x0111:
+            case 0x7000:
                 code[i].opcode = &&MUL;
                 break;
-            case 0x1000:
+            case 0x8000:
                 code[i].opcode = &&STO;
                 break;
-            case 0x1001:
+            case 0x9000:
                 code[i].opcode = &&LDC;
                 break;
-            case 0x1010:
+            case 0xA000:
                 code[i].opcode = &&GTU;
                 break;
-            case 0x1011:
+            case 0xB000:
                 code[i].opcode = &&GTS;
                 break;
-            case 0x1100:
+            case 0xC000:
                 code[i].opcode = &&LTU;
                 break;
-            case 0x1101:
+            case 0xD000:
                 code[i].opcode = &&LTS;
                 break;
-            case 0x1110:
+            case 0xE000:
                 code[i].opcode = &&EQU;
                 break;
-            case 0x1111:
+            case 0xF000:
                 code[i].opcode = &&MAJ;
                 break;
         }
@@ -186,40 +233,29 @@ void emulate() {
     // Here are our routines defined
     LOD:
         // Ovdje treba ja mislim memory[code[TPC].src2] (ja mislim da je greska u proslom kodu)
-        registers[code[TPC].dest] = registers[code[TPC].src2];
-        SPC += 4;
-        TPC++;
-        if(TPC == numberOfInstructions) goto EXIT;
+//        registers[code[TPC].dest] = registers[code[TPC].src2];
+        registers[code[TPC].dest] = memory[code[TPC].src2];
+        if(increaseProgramCountersAndCheckIfEXIT()) goto EXIT;
         goto *code[TPC].opcode;
     ADD:
         registers[code[TPC].dest] = registers[code[TPC].src1] + registers[code[TPC].src2];
-        SPC += 4;
-        TPC++;
-        if(TPC == numberOfInstructions) goto EXIT;
+        if(increaseProgramCountersAndCheckIfEXIT()) goto EXIT;
         goto *code[TPC].opcode;
     SUB:
         registers[code[TPC].dest] = registers[code[TPC].src1] - registers[code[TPC].src2];
-        SPC += 4;
-        TPC++;
-        if(TPC == numberOfInstructions) goto EXIT;
+        if(increaseProgramCountersAndCheckIfEXIT()) goto EXIT;
         goto *code[TPC].opcode;
     AND:
         registers[code[TPC].dest] = registers[code[TPC].src1] & registers[code[TPC].src2];
-        SPC += 4;
-        TPC++;
-        if(TPC == numberOfInstructions) goto EXIT;
+        if(increaseProgramCountersAndCheckIfEXIT()) goto EXIT;
         goto *code[TPC].opcode;
     ORA:
         registers[code[TPC].dest] = registers[code[TPC].src1] | registers[code[TPC].src2];
-        SPC += 4;
-        TPC++;
-        if(TPC == numberOfInstructions) goto EXIT;
+        if(increaseProgramCountersAndCheckIfEXIT()) goto EXIT;
         goto *code[TPC].opcode;
     XOR:
         registers[code[TPC].dest] = registers[code[TPC].src1] ^ registers[code[TPC].src2];
-        SPC += 4;
-        TPC++;
-        if(TPC == numberOfInstructions) goto EXIT;
+        if(increaseProgramCountersAndCheckIfEXIT()) goto EXIT;
         goto *code[TPC].opcode;
     SHR:
         r = registers[code[TPC].src2];
@@ -236,40 +272,28 @@ void emulate() {
         else
             registers[code[TPC].dest] = registers[code[TPC].src1] << n;
 
-        SPC += 4;
-        TPC++;
-        if(TPC == numberOfInstructions) goto EXIT;
+        if(increaseProgramCountersAndCheckIfEXIT()) goto EXIT;
         goto *code[TPC].opcode;
     MUL:
         registers[code[TPC].dest] = registers[code[TPC].src1] * registers[code[TPC].src2];
-        SPC += 4;
-        TPC++;
-        if(TPC == numberOfInstructions) goto EXIT;
+        if(increaseProgramCountersAndCheckIfEXIT()) goto EXIT;
         goto *code[TPC].opcode;
     STO:
         memory[registers[code[TPC].src2]] = registers[code[TPC].src1];
         registers[code[TPC].dest] = registers[code[TPC].src1];
-        SPC += 4;
-        TPC++;
-        if(TPC == numberOfInstructions) goto EXIT;
+        if(increaseProgramCountersAndCheckIfEXIT()) goto EXIT;
         goto *code[TPC].opcode;
     LDC:
         registers[code[TPC].dest] = (code[TPC].src1 | code[TPC].src2);
-        SPC += 4;
-        TPC++;
-        if(TPC == numberOfInstructions) goto EXIT;
+        if(increaseProgramCountersAndCheckIfEXIT()) goto EXIT;
         goto *code[TPC].opcode;
     GTU:
         registers[code[TPC].dest] = registers[code[TPC].src1] > registers[code[TPC].src2] ? 0x0001 : 0x0000;
-        SPC += 4;
-        TPC++;
-        if(TPC == numberOfInstructions) goto EXIT;
+        if(increaseProgramCountersAndCheckIfEXIT()) goto EXIT;
         goto *code[TPC].opcode;
     GTS:
-        r = registers[code[TPC].src1];
-        n = registers[code[TPC].src2];
-        rBOOL = (r & 0x8000) == 0x0000 ? false : true;
-        nBOOL = (n & 0x8000) == 0x0000 ? false : true;
+        rBOOL = (registers[code[TPC].src1] & 0x8000) == 0x0000 ? false : true;
+        nBOOL = (registers[code[TPC].src2] & 0x8000) == 0x0000 ? false : true;
         if(rBOOL && !nBOOL)
             registers[code[TPC].dest] = 0x0001;
         else if(!rBOOL && nBOOL)
@@ -277,21 +301,15 @@ void emulate() {
         else
             registers[code[TPC].dest] = registers[code[TPC].src1] > registers[code[TPC].src2] ? 0x0001 : 0x0000;
 
-        SPC += 4;
-        TPC++;
-        if(TPC == numberOfInstructions) goto EXIT;
+        if(increaseProgramCountersAndCheckIfEXIT()) goto EXIT;
         goto *code[TPC].opcode;
     LTU:
         registers[code[TPC].dest] = registers[code[TPC].src1] < registers[code[TPC].dest] ? 0x0001 : 0x0000;
-        SPC += 4;
-        TPC++;
-        if(TPC == numberOfInstructions) goto EXIT;
+        if(increaseProgramCountersAndCheckIfEXIT()) goto EXIT;
         goto *code[TPC].opcode;
     LTS:
-        r = registers[code[TPC].src1];
-        n = registers[code[TPC].src2];
-        rBOOL = (r & 0x8000) == 0x0000 ? false : true;
-        nBOOL = (n & 0x8000) == 0x0000 ? false : true;
+        rBOOL = (registers[code[TPC].src1] & 0x8000) == 0x0000 ? false : true;
+        nBOOL = (registers[code[TPC].src2] & 0x8000) == 0x0000 ? false : true;
         if(rBOOL && !nBOOL)
             registers[code[TPC].dest] = 0x0000;
         else if(!rBOOL && nBOOL)
@@ -299,19 +317,90 @@ void emulate() {
         else
             registers[code[TPC].dest] = registers[code[TPC].src1] < registers[code[TPC].src2] ? 0x0001 : 0x0000;
 
-        SPC += 4;
-        TPC++;
-        if(TPC == numberOfInstructions) goto EXIT;
+        if(increaseProgramCountersAndCheckIfEXIT()) goto EXIT;
         goto *code[TPC].opcode;
     EQU:
         registers[code[TPC].dest] = registers[code[TPC].src1] == registers[code[TPC].src2] ? 0x0001 : 0x0000;
-        SPC += 4;
-        TPC++;
-        if(TPC == numberOfInstructions) goto EXIT;
+        if(increaseProgramCountersAndCheckIfEXIT()) goto EXIT;
         goto *code[TPC].opcode;
     MAJ:
+//        registers[code[TPC].dest] = registers[code[TPC].src1];
+        // What if DEST and SRC2 are the same
+        temporarySRC2 = registers[code[TPC].src2];
+        // We need to remember our PC location in this register
+        registers[15] = TPC;
+        registers[code[TPC].dest] = registers[15];
 
+        // We set the PC's here
+        registers[15] = code[TPC].src2;
+        SPC += 4;
+
+        int numberOfBytes;
+        // Maybe we need this line here
+//        registers[15] == 0x000F &&
+        if(code[TPC].dest == 0x000C && code[TPC].src1 == 0x000F && code[TPC].src2 == 0x000B && temporarySRC2 == 0xFFF0) {
+            // System calls
+            std::string fn, fileName;
+            int exists;
+
+            // We can use here (registers[0] & 0x000F) or (registers[0] & 0x0003), it will have the same effect for our case
+            switch(registers[0] & 0x000F) {
+                case 0x0000:
+                    fn = "./storage/" + readFromMemory(registers[1]);
+                    if ((fd = open(fn.c_str(), openModes[registers[2] & 0x000F] | openModes[(registers[2] >> 4) & 0x000F] | openModes[(registers[2] >> 8) & 0x000F] | openModes[(registers[2] >> 12) & 0x000F])) < 0)
+                        perror("open() error");
+                    else {
+                        registers[1] = fd;
+                        std::cout << "File with the name: " << fn << " opened!" << std::endl;
+                    }
+                    break;
+                case 0x0001:
+                    if(registers[1] < 0)
+                        std::cout << "No file opened!" << std::endl;
+                    else {
+                        char buff[1024];
+                        if((numberOfBytes = read(registers[1], buff, registers[3])) > 0) {
+                            cout << "Read block: " << std::endl << buff << std::endl;
+                            stringForWriting = buff;
+                            writeToMemory(registers[2], stringForWriting, registers[3]);
+                        }
+                        else
+                            std::cout << "Mistake at reading a block!" << std::endl;
+                    }
+                    break;
+                case 0x0002:
+                    if(registers[1] < 0)
+                        std::cout << "No file opened!" << std::endl;
+                    else {
+                        stringForWriting = readFromMemory(registers[2],registers[3]);
+                        // CHECK WHY THERE ARE ONLY 3 CHARACTERS HERE
+                        char stringForWritingChar[3];
+                        for (int i = 0; i < stringForWriting.length(); i++)
+                            stringForWritingChar[i] = stringForWriting[i];
+                        if((numberOfBytes = write(registers[1], stringForWritingChar, registers[3])) == -1)
+                            std::cout << "Writing to file failed!";
+                        else
+                            std::cout << "Number of written bytes: " << numberOfBytes << std::endl;
+                    }
+                    break;
+                case 0x0003:
+                    if(registers[1] != 0) {
+                        close(registers[1]);
+                        std::cout << "File closed!" << std::endl;
+                    } else
+                        std::cout << "Mistake at closing file!" << std::endl;
+                    break;
+            }
+        }
+
+        // Check this part out a bit more if this works nicely
+        registers[15] = registers[code[TPC].dest];
+        TPC = registers[code[TPC].dest];
+
+        if(TPC >= numberOfInstructions) goto EXIT;
+        goto *code[TPC].opcode;
     EXIT:
+        // We deallocate, free up manually all the variables and memory
         memory[65536] = {0x0000};
         n = 0;
         k = 0;
@@ -324,7 +413,6 @@ void emulate() {
 int main() {
     settingRegistersToZero();
     populateOpenModes();
-    populateLseeekPos();
     populateFileModes();
     emulate();
     return 0;
