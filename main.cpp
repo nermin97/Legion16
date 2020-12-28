@@ -26,7 +26,7 @@ struct instruction {
 } code[65536];
 
 unsigned short int TPC = 0, SPC = 0, memory[65536]={0x0000}, registers[16], numberOfInstructions; // regs[15] je PC
-int fileModes[16], openModes[16], lseekpos[16], fd;
+int openModes[16], fd;
 
 void populateOpenModes(){
     openModes[0] = 0;//O_RDONLY
@@ -47,32 +47,6 @@ void populateOpenModes(){
     openModes[15] = 0;
 }
 
-void populateFileModes(){
-    fileModes[0] = 64;//S_IXUSR
-    fileModes[1] = 128;//S_IWUSR
-    fileModes[2] = 256;//S_IRUSR
-    fileModes[3] = 448;//S_IRWXU
-    fileModes[4] = 256;//Defaultna vrijednost u slicaju da je rijec registra R2 veca od 4;
-    fileModes[5] = 256;
-    fileModes[6] = 256;
-    fileModes[7] = 256;
-    fileModes[8] = 256;
-    fileModes[9] = 256;
-    fileModes[10] = 256;
-    fileModes[11] = 256;
-    fileModes[12] = 256;
-    fileModes[13] = 256;
-    fileModes[14] = 256;
-    fileModes[15] = 256;
-
-
-    //Napomena: Neki mode/privilegije koji su podržani u unix sistemima, nisu podržani u windowsu.
-    //Također, neki mode/privilegije su podržane u nekim kompajlerima
-    //https://www.ibm.com/support/knowledgecenter/SSLTBW_2.2.0/com.ibm.zos.v2r2.bpxbd00/rtcre.htm
-
-
-}
-
 void settingRegistersToZero() {
     // Setting registers to zero
     // registers[15] is PC(Program counter) register
@@ -80,10 +54,20 @@ void settingRegistersToZero() {
         registers[i] = 0;
 }
 
-bool increaseProgramCountersAndCheckIfEXIT() {
+bool checkTPCLimit() {
+    if(TPC >= numberOfInstructions)
+        return true;
+    return false;
+}
+
+void increasePCs() {
     SPC += 4;
     TPC++;
-    if(TPC >= numberOfInstructions)
+}
+
+bool increaseProgramCountersAndCheckIfEXIT() {
+    increasePCs();
+    if(checkTPCLimit())
         return true;
     return false;
 }
@@ -407,7 +391,6 @@ void emulate() {
 int main() {
     settingRegistersToZero();
     populateOpenModes();
-    populateFileModes();
     emulate();
     return 0;
 }
