@@ -15,6 +15,7 @@
 #include <sstream>
 #include <cmath>
 #include <time.h>
+#include <map>
 
 using namespace std;
 
@@ -167,57 +168,60 @@ void emulate() {
     for(int i = 0; i < numberOfInstructions; ++i) {
         memory[i] = rand() % 65536;
 
+        void* routinesArray[16] = {&&LOD, &&ADD, &&SUB, &&AND, &&ORA, &&XOR, &&SHR, &&MUL, &&STO, &&LDC, &&GTU, &&GTS, &&LTU, &&LTS, &&EQU, &&MAJ};
+        code[i].opcode = routinesArray[(memory[i] >> 12) & 0x000F];
+
         // decide what routine it is to which to jump to
-        switch(memory[i] & 0xF000) {
-            case 0x0000:
-                code[i].opcode = &&LOD;
-                break;
-            case 0x1000:
-                code[i].opcode = &&ADD;
-                break;
-            case 0x2000:
-                code[i].opcode = &&SUB;
-                break;
-            case 0x3000:
-                code[i].opcode = &&AND;
-                break;
-            case 0x4000:
-                code[i].opcode = &&ORA;
-                break;
-            case 0x5000:
-                code[i].opcode = &&XOR;
-                break;
-            case 0x6000:
-                code[i].opcode = &&SHR;
-                break;
-            case 0x7000:
-                code[i].opcode = &&MUL;
-                break;
-            case 0x8000:
-                code[i].opcode = &&STO;
-                break;
-            case 0x9000:
-                code[i].opcode = &&LDC;
-                break;
-            case 0xA000:
-                code[i].opcode = &&GTU;
-                break;
-            case 0xB000:
-                code[i].opcode = &&GTS;
-                break;
-            case 0xC000:
-                code[i].opcode = &&LTU;
-                break;
-            case 0xD000:
-                code[i].opcode = &&LTS;
-                break;
-            case 0xE000:
-                code[i].opcode = &&EQU;
-                break;
-            case 0xF000:
-                code[i].opcode = &&MAJ;
-                break;
-        }
+//        switch(memory[i] & 0xF000) {
+//            case 0x0000:
+//                code[i].opcode = &&LOD;
+//                break;
+//            case 0x1000:
+//                code[i].opcode = &&ADD;
+//                break;
+//            case 0x2000:
+//                code[i].opcode = &&SUB;
+//                break;
+//            case 0x3000:
+//                code[i].opcode = &&AND;
+//                break;
+//            case 0x4000:
+//                code[i].opcode = &&ORA;
+//                break;
+//            case 0x5000:
+//                code[i].opcode = &&XOR;
+//                break;
+//            case 0x6000:
+//                code[i].opcode = &&SHR;
+//                break;
+//            case 0x7000:
+//                code[i].opcode = &&MUL;
+//                break;
+//            case 0x8000:
+//                code[i].opcode = &&STO;
+//                break;
+//            case 0x9000:
+//                code[i].opcode = &&LDC;
+//                break;
+//            case 0xA000:
+//                code[i].opcode = &&GTU;
+//                break;
+//            case 0xB000:
+//                code[i].opcode = &&GTS;
+//                break;
+//            case 0xC000:
+//                code[i].opcode = &&LTU;
+//                break;
+//            case 0xD000:
+//                code[i].opcode = &&LTS;
+//                break;
+//            case 0xE000:
+//                code[i].opcode = &&EQU;
+//                break;
+//            case 0xF000:
+//                code[i].opcode = &&MAJ;
+//                break;
+//        }
 
         code[i].dest = (memory[i] >> 8) & 0x000F;
         code[i].src1 = (memory[i] >> 4) & 0x000F;
