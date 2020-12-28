@@ -157,7 +157,7 @@ void writeToMemory(int whereToWrite, std::string stringToWrite, int numberOfByte
 
 void emulate() {
     // Output Constants:
-    const string DESTINATION = ", Destination: ";
+    const string DESTINATION = "Destination: ";
     const string SOURCE_1 = ", Source_1: ";
     const string SOURCE_2 = ", Source_2: ";
 
@@ -189,8 +189,6 @@ void emulate() {
     // Here are our routines defined
     LOD:
         cout << "LOD" << endl;
-        // Ovdje treba ja mislim memory[code[TPC].src2] (ja mislim da je greska u proslom kodu)
-//        registers[code[TPC].dest] = registers[code[TPC].src2];
         registers[code[TPC].dest] = memory[code[TPC].src2];
         cout << DESTINATION << "registers[" << to_string(code[TPC].dest) << "]" << SOURCE_2 << "memory[" << to_string(code[TPC].src2) << "]" << endl << endl;
         if(increaseProgramCountersAndCheckIfEXIT()) goto EXIT;
