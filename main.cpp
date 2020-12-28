@@ -156,6 +156,11 @@ void writeToMemory(int whereToWrite, std::string stringToWrite, int numberOfByte
 }
 
 void emulate() {
+    // Output Constants:
+    const string DESTINATION = ", Destination: ";
+    const string SOURCE_1 = ", Source_1: ";
+    const string SOURCE_2 = ", Source_2: ";
+
     // Program counters
     unsigned short int r, n, k, temporarySRC2;
     bool rBOOL, nBOOL;
@@ -183,38 +188,51 @@ void emulate() {
 
     // Here are our routines defined
     LOD:
+        cout << "LOD" << endl;
         // Ovdje treba ja mislim memory[code[TPC].src2] (ja mislim da je greska u proslom kodu)
 //        registers[code[TPC].dest] = registers[code[TPC].src2];
         registers[code[TPC].dest] = memory[code[TPC].src2];
+        cout << DESTINATION << "registers[" << to_string(code[TPC].dest) << "]" << SOURCE_2 << "memory[" << to_string(code[TPC].src2) << "]" << endl << endl;
         if(increaseProgramCountersAndCheckIfEXIT()) goto EXIT;
         goto *code[TPC].opcode;
     ADD:
+        cout << "ADD" << endl;
         registers[code[TPC].dest] = registers[code[TPC].src1] + registers[code[TPC].src2];
+        cout << DESTINATION << "registers[" << to_string(code[TPC].dest) << "]" << SOURCE_1 << "registers[" << to_string(code[TPC].src1) << "]" << SOURCE_2 << "registers[" << to_string(code[TPC].src2) << "]" << endl << endl;
         if(increaseProgramCountersAndCheckIfEXIT()) goto EXIT;
         goto *code[TPC].opcode;
     SUB:
+        cout << "SUB" << endl;
         registers[code[TPC].dest] = registers[code[TPC].src1] - registers[code[TPC].src2];
+        cout << DESTINATION << "registers[" << to_string(code[TPC].dest) << "]" << SOURCE_1 << "registers[" << to_string(code[TPC].src1) << "]" << SOURCE_2 << "registers[" << to_string(code[TPC].src2) << "]" << endl << endl;
         if(increaseProgramCountersAndCheckIfEXIT()) goto EXIT;
         goto *code[TPC].opcode;
     AND:
+        cout << "AND" << endl;
         registers[code[TPC].dest] = registers[code[TPC].src1] & registers[code[TPC].src2];
+        cout << DESTINATION << "registers[" << to_string(code[TPC].dest) << "]" << SOURCE_1 << "registers[" << to_string(code[TPC].src1) << "]" << SOURCE_2 << "registers[" << to_string(code[TPC].src2) << "]" << endl << endl;
         if(increaseProgramCountersAndCheckIfEXIT()) goto EXIT;
         goto *code[TPC].opcode;
     ORA:
+        cout << "ORA" << endl;
         registers[code[TPC].dest] = registers[code[TPC].src1] | registers[code[TPC].src2];
+        cout << DESTINATION << "registers[" << to_string(code[TPC].dest) << "]" << SOURCE_1 << "registers[" << to_string(code[TPC].src1) << "]" << SOURCE_2 << "registers[" << to_string(code[TPC].src2) << "]" << endl << endl;
         if(increaseProgramCountersAndCheckIfEXIT()) goto EXIT;
         goto *code[TPC].opcode;
     XOR:
+        cout << "XOR:" << endl;
         registers[code[TPC].dest] = registers[code[TPC].src1] ^ registers[code[TPC].src2];
+        cout << DESTINATION << "registers[" << to_string(code[TPC].dest) << "]" << SOURCE_1 << "registers[" << to_string(code[TPC].src1) << "]" << SOURCE_2 << "registers[" << to_string(code[TPC].src2) << "]" << endl << endl;
         if(increaseProgramCountersAndCheckIfEXIT()) goto EXIT;
         goto *code[TPC].opcode;
     SHR:
+        cout << "Executing SHR" << endl << endl;
         r = registers[code[TPC].src2];
         n = registers[code[TPC].src2] & 0x000F;
         if (((r >> 4) & 0x0003) == 0) {
             k = (registers[code[TPC].src1] | 0x7FFF);
             // odredjivanje je li 1 najveci bit, ako je 1 mora se dodati 1 na kraj, a ako je 0, obicni shift ce svakako dodati nulu
-            registers[code[TPC].dest] = k == 0xFFFF ?  (registers[code[TPC].src1] >> n) & ~(((0x1 << 16) >> n) << 1) : registers[code[TPC].src1] >> n;
+            registers[code[TPC].dest] = (k == 0xFFFF) ?  (registers[code[TPC].src1] >> n) & ~(((0x1 << 16) >> n) << 1) : registers[code[TPC].src1] >> n;
         }
         else if (((r >> 4) & 0x0003) == 1)
             registers[code[TPC].dest] = registers[code[TPC].src1] >> n;
@@ -226,55 +244,82 @@ void emulate() {
         if(increaseProgramCountersAndCheckIfEXIT()) goto EXIT;
         goto *code[TPC].opcode;
     MUL:
+        cout << "MUL" << endl;
         registers[code[TPC].dest] = registers[code[TPC].src1] * registers[code[TPC].src2];
+        cout << DESTINATION << "registers[" << to_string(code[TPC].dest) << "]" << SOURCE_1 << "registers[" << to_string(code[TPC].src1) << "]" << SOURCE_2 << "registers[" << to_string(code[TPC].src2) << "]" << endl << endl;
         if(increaseProgramCountersAndCheckIfEXIT()) goto EXIT;
         goto *code[TPC].opcode;
     STO:
+        cout << "STO" << endl;
         memory[registers[code[TPC].src2]] = registers[code[TPC].src1];
+        cout <<  "memory[" << SOURCE_2 << "registers[" << to_string(code[TPC].src2) << "]] =" << SOURCE_1 << "registers[" << to_string(code[TPC].src1) << "]" << endl;
         registers[code[TPC].dest] = registers[code[TPC].src1];
+        cout << DESTINATION << "registers[" << to_string(code[TPC].dest) << "]" << SOURCE_1 << "registers[" << to_string(code[TPC].src1) << "]" << endl << endl;
         if(increaseProgramCountersAndCheckIfEXIT()) goto EXIT;
         goto *code[TPC].opcode;
     LDC:
+        cout << "LDC" << endl;
         registers[code[TPC].dest] = (code[TPC].src1 | code[TPC].src2);
+        cout << DESTINATION << "registers[" << to_string(code[TPC].dest) << "]" << SOURCE_1 << "registers[" << to_string(code[TPC].src1) << "]" << SOURCE_2 << "registers[" << to_string(code[TPC].src2) << "]" << endl << endl;
         if(increaseProgramCountersAndCheckIfEXIT()) goto EXIT;
         goto *code[TPC].opcode;
     GTU:
+        cout << "GTU" << endl;
         registers[code[TPC].dest] = registers[code[TPC].src1] > registers[code[TPC].src2] ? 0x0001 : 0x0000;
+        cout << DESTINATION << "registers[" << to_string(code[TPC].dest) << "]" << SOURCE_1 << "registers[" << to_string(code[TPC].src1) << "]" << SOURCE_2 << "registers[" << to_string(code[TPC].src2) << "]" << endl << endl;
         if(increaseProgramCountersAndCheckIfEXIT()) goto EXIT;
         goto *code[TPC].opcode;
     GTS:
-        rBOOL = (registers[code[TPC].src1] & 0x8000) == 0x0000 ? false : true;
-        nBOOL = (registers[code[TPC].src2] & 0x8000) == 0x0000 ? false : true;
-        if(rBOOL && !nBOOL)
+        cout << "GTS" << endl;
+        rBOOL = (registers[code[TPC].src1] & 0x8000) != 0x0000;
+        nBOOL = (registers[code[TPC].src2] & 0x8000) != 0x0000;
+        if(rBOOL && !nBOOL) {
             registers[code[TPC].dest] = 0x0001;
-        else if(!rBOOL && nBOOL)
+            cout << DESTINATION << "registers[" << to_string(code[TPC].dest) << "] = 0x0001" << endl << endl;
+        }
+        else if(!rBOOL && nBOOL) {
             registers[code[TPC].dest] = 0x0000;
-        else
+            cout << DESTINATION << "registers[" << to_string(code[TPC].dest) << "] = 0x0000" << endl << endl;
+        }
+        else {
             registers[code[TPC].dest] = registers[code[TPC].src1] > registers[code[TPC].src2] ? 0x0001 : 0x0000;
-
+            cout << DESTINATION << "registers[" << to_string(code[TPC].dest) << "]" << SOURCE_1 << "registers[" << to_string(code[TPC].src1) << "]" << SOURCE_2 << "registers[" << to_string(code[TPC].src2) << "]" << endl << endl;
+        }
         if(increaseProgramCountersAndCheckIfEXIT()) goto EXIT;
         goto *code[TPC].opcode;
     LTU:
+        cout << "LTU" << endl;
         registers[code[TPC].dest] = registers[code[TPC].src1] < registers[code[TPC].dest] ? 0x0001 : 0x0000;
+        cout << DESTINATION << "registers[" << to_string(code[TPC].dest) << "]" << SOURCE_1 << "registers[" << to_string(code[TPC].src1) << "]" << SOURCE_2 << "registers[" << to_string(code[TPC].src2) << "]" << endl << endl;
         if(increaseProgramCountersAndCheckIfEXIT()) goto EXIT;
         goto *code[TPC].opcode;
     LTS:
-        rBOOL = (registers[code[TPC].src1] & 0x8000) == 0x0000 ? false : true;
-        nBOOL = (registers[code[TPC].src2] & 0x8000) == 0x0000 ? false : true;
-        if(rBOOL && !nBOOL)
+        cout << "LTS" << endl;
+        rBOOL = (registers[code[TPC].src1] & 0x8000) != 0x0000;
+        nBOOL = (registers[code[TPC].src2] & 0x8000) != 0x0000;
+        if(rBOOL && !nBOOL) {
             registers[code[TPC].dest] = 0x0000;
-        else if(!rBOOL && nBOOL)
+            cout << DESTINATION << "registers[" << to_string(code[TPC].dest) << "] = 0x0000" << endl << endl;
+        }
+        else if(!rBOOL && nBOOL) {
             registers[code[TPC].dest] = 0x0001;
-        else
+            cout << DESTINATION << "registers[" << to_string(code[TPC].dest) << "] = 0x0001" << endl << endl;
+        }
+        else {
             registers[code[TPC].dest] = registers[code[TPC].src1] < registers[code[TPC].src2] ? 0x0001 : 0x0000;
+            cout << DESTINATION << "registers[" << to_string(code[TPC].dest) << "]" << SOURCE_1 << "registers[" << to_string(code[TPC].src1) << "]" << SOURCE_2 << "registers[" << to_string(code[TPC].src2) << "]" << endl << endl;
+        }
 
         if(increaseProgramCountersAndCheckIfEXIT()) goto EXIT;
         goto *code[TPC].opcode;
     EQU:
+        cout << "EQU" << endl;
         registers[code[TPC].dest] = registers[code[TPC].src1] == registers[code[TPC].src2] ? 0x0001 : 0x0000;
+        cout << DESTINATION << "registers[" << to_string(code[TPC].dest) << "]" << SOURCE_1 << "registers[" << to_string(code[TPC].src1) << "]" << SOURCE_2 << "registers[" << to_string(code[TPC].src2) << "]" << endl << endl;
         if(increaseProgramCountersAndCheckIfEXIT()) goto EXIT;
         goto *code[TPC].opcode;
     MAJ:
+        cout << "MAJ" << endl;
 //        registers[code[TPC].dest] = registers[code[TPC].src1];
         // What if DEST and SRC2 are the same
         temporarySRC2 = registers[code[TPC].src2];
