@@ -2,7 +2,7 @@
 #include <fstream>
 #include <bits/stdc++.h>
 #include <sys/stat.h>
-#include<string>
+#include <string>
 #include <bitset>
 #include <dirent.h>
 #include <vector>
@@ -74,7 +74,6 @@ bool increaseProgramCountersAndCheckIfEXIT() {
 
 std::string readFromMemory(int address, int numberOfBytes = 0) {
     std::string name = "";
-    //Provjeriti uslove
     char firstCharacter = (0x00);
     char secondCharacter = (0x00);
     int charactersRead = 0;
