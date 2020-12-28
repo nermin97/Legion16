@@ -1,31 +1,20 @@
 #include <iostream>
-#include <fstream>
-#include <bits/stdc++.h>
-#include <sys/stat.h>
 #include <string>
-#include <bitset>
-#include <dirent.h>
-#include <vector>
-#define _POSIX_SOURCE
 #include <fcntl.h>
-#include <sys/types.h>
 #include <unistd.h>
-#undef _POSIX_SOURCE
-#include <stdio.h>
+#include <cstdio>
 #include <sstream>
-#include <cmath>
-#include <time.h>
-#include <map>
+#include <ctime>
 
 using namespace std;
 
 struct instruction {
-    void* opcode;
+    void* opcode = nullptr;
     unsigned short int src2 = 0x0000;
-    unsigned char dest, src1;
+    unsigned char dest = 0x0, src1= 0x0;
 } code[65536];
 
-unsigned short int TPC = 0, SPC = 0, memory[65536]={0x0000}, registers[16], numberOfInstructions; // regs[15] je PC
+unsigned short int TPC = 0, SPC = 0, memory[65536]={0x0000}, registers[16] = {0}, numberOfInstructions; // regs[15] je PC
 int openModes[16], fd;
 
 void populateOpenModes(){
@@ -47,13 +36,6 @@ void populateOpenModes(){
     openModes[15] = 0;
 }
 
-void settingRegistersToZero() {
-    // Setting registers to zero
-    // registers[15] is PC(Program counter) register
-    for(int i = 0; i < 16; i++)
-        registers[i] = 0;
-}
-
 bool checkTPCLimit() {
     if(TPC >= numberOfInstructions)
         return true;
@@ -73,9 +55,9 @@ bool increaseProgramCountersAndCheckIfEXIT() {
 }
 
 std::string readFromMemory(int address, int numberOfBytes = 0) {
-    std::string name = "";
-    char firstCharacter = (0x00);
-    char secondCharacter = (0x00);
+    std::string name;
+    char firstCharacter;
+    char secondCharacter;
     int charactersRead = 0;
 
     do {
@@ -147,11 +129,11 @@ void emulate() {
     // Program counters
     unsigned short int r, n, k, temporarySRC2;
     bool rBOOL, nBOOL;
-    std::string stringForWriting = "";
+    std::string stringForWriting;
     void* routinesArray[16] = {&&LOD, &&ADD, &&SUB, &&AND, &&ORA, &&XOR, &&SHR, &&MUL, &&STO, &&LDC, &&GTU, &&GTS, &&LTU, &&LTS, &&EQU, &&MAJ};
     // We need here code for specific opcode, dest, src1 and src2
     // Used to generate random instructions and a random number of those
-    srand (time(NULL));
+    srand (time(nullptr));
 
     numberOfInstructions = rand() % 1000 + 100;
     for(int i = 0; i < numberOfInstructions; ++i) {
@@ -164,7 +146,7 @@ void emulate() {
     }
 
     // Check if there is no data available
-    if(numberOfInstructions == 0 || sizeof(memory) == 0 || sizeof(code) == 0) goto EXIT;
+    if(numberOfInstructions == 0) goto EXIT;
 
     // Initial jump to first routine
     goto *code[0].opcode;
@@ -318,7 +300,6 @@ void emulate() {
         if(code[TPC].dest == 0x000C && code[TPC].src1 == 0x000F && code[TPC].src2 == 0x000B && temporarySRC2 == 0xFFF0) {
             // System calls
             std::string fn, fileName;
-            int exists;
 
             // We can use here (registers[0] & 0x000F) or (registers[0] & 0x0003), it will have the same effect for our case
             switch(registers[0] & 0x000F) {
@@ -379,18 +360,10 @@ void emulate() {
         if(TPC >= numberOfInstructions) goto EXIT;
         goto *code[TPC].opcode;
     EXIT:
-        // We deallocate, free up manually all the variables and memory
-        memory[65536] = {0x0000};
-        n = 0;
-        k = 0;
-        r = 0;
-        TPC = 0;
-        SPC = 0;
         cout << "End of emulation!" << std::endl;
 }
 
 int main() {
-    settingRegistersToZero();
     populateOpenModes();
     emulate();
     return 0;
