@@ -375,6 +375,8 @@ void emulate() {
         registers[15] = registers[code[TPC].dest];
         TPC = registers[code[TPC].dest];
 
+        TPC++;
+
         if(TPC >= numberOfInstructions) goto EXIT;
         goto *code[TPC].opcode;
     EXIT:
