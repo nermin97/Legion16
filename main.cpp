@@ -127,7 +127,7 @@ void emulate() {
     const string SOURCE_2 = ", Source_2: ";
 
     // Program counters
-    unsigned short int r, n, k, temporarySRC2;
+    unsigned short int r, n, k, r_temp, temporarySRC2;
     bool rBOOL, nBOOL;
     std::string stringForWriting;
     void* routinesArray[16] = {&&LOD, &&ADD, &&SUB, &&AND, &&ORA, &&XOR, &&SHR, &&MUL, &&STO, &&LDC, &&GTU, &&GTS, &&LTU, &&LTS, &&EQU, &&MAJ};
@@ -192,14 +192,15 @@ void emulate() {
         cout << "Executing SHR" << endl << endl;
         r = registers[code[TPC].src2];
         n = registers[code[TPC].src2] & 0x000F;
-        if (((r >> 4) & 0x0003) == 0) {
+        r_temp = ((r >> 4) & 0x0003);
+        if (r_temp == 0) {
             k = (registers[code[TPC].src1] | 0x7FFF);
             // odredjivanje je li 1 najveci bit, ako je 1 mora se dodati 1 na kraj, a ako je 0, obicni shift ce svakako dodati nulu
             registers[code[TPC].dest] = (k == 0xFFFF) ?  (registers[code[TPC].src1] >> n) & ~(((0x1 << 16) >> n) << 1) : registers[code[TPC].src1] >> n;
         }
-        else if (((r >> 4) & 0x0003) == 1)
+        else if (r_temp == 1)
             registers[code[TPC].dest] = registers[code[TPC].src1] >> n;
-        else if (((r >> 4) & 0x0003) == 2)
+        else if (r_temp == 2)
             registers[code[TPC].dest] = (registers[code[TPC].src1] << n) | (registers[code[TPC].src1] >> (16 - n));
         else
             registers[code[TPC].dest] = registers[code[TPC].src1] << n;
