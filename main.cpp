@@ -136,6 +136,8 @@ void emulate() {
     srand (time(nullptr));
 
     numberOfInstructions = rand() % 1000 + 100;
+    cout << "Number of instructions: " << numberOfInstructions << endl;
+
     for(int i = 0; i < numberOfInstructions; ++i) {
         memory[i] = rand() % 65536;
 
@@ -195,7 +197,6 @@ void emulate() {
         r_temp = ((r >> 4) & 0x0003);
         if (r_temp == 0) {
             k = (registers[code[TPC].src1] | 0x7FFF);
-            // odredjivanje je li 1 najveci bit, ako je 1 mora se dodati 1 na kraj, a ako je 0, obicni shift ce svakako dodati nulu
             registers[code[TPC].dest] = (k == 0xFFFF) ?  (registers[code[TPC].src1] >> n) & ~(((0x1 << 16) >> n) << 1) : registers[code[TPC].src1] >> n;
         }
         else if (r_temp == 1)
@@ -284,21 +285,14 @@ void emulate() {
         goto *code[TPC].opcode;
     MAJ:
         cout << "MAJ" << endl;
-//        registers[code[TPC].dest] = registers[code[TPC].src1];
-        // What if DEST and SRC2 are the same
-        temporarySRC2 = registers[code[TPC].src2];
-        // We need to remember our PC location in this register
-        registers[15] = TPC;
-        registers[code[TPC].dest] = registers[15];
+        temporarySRC2 = TPC;
+        registers[code[TPC].dest] = registers[code[TPC].src1];
 
-        // We set the PC's here
-        registers[15] = code[TPC].src2;
+        TPC = registers[code[TPC].src2];
         SPC += 4;
 
         int numberOfBytes;
-        // Maybe we need this line here
-//        registers[15] == 0x000F &&
-        if(code[TPC].dest == 0x000C && code[TPC].src1 == 0x000F && code[TPC].src2 == 0x000B && temporarySRC2 == 0xFFF0) {
+        if(code[temporarySRC2].dest == 0x000C && code[temporarySRC2].src1 == 0x000F && code[temporarySRC2].src2 == 0x000B && registers[code[temporarySRC2].src2] == 0xFFF0) {
             // System calls
             std::string fn, fileName;
 
@@ -352,10 +346,11 @@ void emulate() {
             }
         }
 
-        // Check this part out a bit more if this works nicely
-        registers[15] = registers[code[TPC].dest];
-        TPC = registers[code[TPC].dest];
+        if(TPC >= numberOfInstructions) goto EXIT;
 
+        if(registers[code[temporarySRC2].src1] == 0x000F) goto *code[TPC].opcode;
+
+        TPC = temporarySRC2;
         TPC++;
 
         if(TPC >= numberOfInstructions) goto EXIT;
