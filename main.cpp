@@ -8,6 +8,7 @@
 
 using namespace std;
 
+// Struktura instrukcije
 struct instruction {
     void* opcode = nullptr;
     unsigned short int src2 = 0x0000;
@@ -16,6 +17,17 @@ struct instruction {
 
 unsigned short int TPC = 0, SPC = 0, memory[65536]={0x0000}, registers[16] = {0}, numberOfInstructions;
 int openModes[16], fd;
+
+bool checkTPCLimit() {
+    if(TPC >= numberOfInstructions)
+        return true;
+    return false;
+}
+
+void increasePCs() {
+    SPC += 4;
+    TPC++;
+}
 
 void populateOpenModes(){
     openModes[0] = 0;//O_RDONLY
@@ -34,17 +46,6 @@ void populateOpenModes(){
     openModes[13] = 0;
     openModes[14] = 0;
     openModes[15] = 0;
-}
-
-bool checkTPCLimit() {
-    if(TPC >= numberOfInstructions)
-        return true;
-    return false;
-}
-
-void increasePCs() {
-    SPC += 4;
-    TPC++;
 }
 
 bool increaseProgramCountersAndCheckIfEXIT() {
@@ -153,9 +154,12 @@ void emulate() {
     // Initial jump to first routine
     goto *code[0].opcode;
 
+    // Addition to STO and LOD instruction unpacking
+
     // Here are our routines defined
     LOD:
         cout << "LOD" << endl;
+        // special case if src2 == PC add 2
         registers[code[TPC].dest] = memory[code[TPC].src2];
         cout << DESTINATION << "registers[" << to_string(code[TPC].dest) << "]" << SOURCE_2 << "memory[" << to_string(code[TPC].src2) << "]" << endl << endl;
         if(increaseProgramCountersAndCheckIfEXIT()) goto EXIT;
@@ -292,6 +296,7 @@ void emulate() {
         SPC += 4;
 
         int numberOfBytes;
+
         if(code[temporarySRC2].dest == 0x000C && code[temporarySRC2].src1 == 0x000F && code[temporarySRC2].src2 == 0x000B && registers[code[temporarySRC2].src2] == 0xFFF0) {
             // System calls
             std::string fn, fileName;
