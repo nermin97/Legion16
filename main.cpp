@@ -14,7 +14,7 @@ struct instruction {
     unsigned char dest = 0x0, src1= 0x0;
 } code[65536];
 
-unsigned short int TPC = 0, SPC = 0, memory[65536]={0x0000}, registers[16] = {0}, numberOfInstructions; // regs[15] je PC
+unsigned short int TPC = 0, SPC = 0, memory[65536]={0x0000}, registers[16] = {0}, numberOfInstructions;
 int openModes[16], fd;
 
 void populateOpenModes(){
@@ -326,7 +326,6 @@ void emulate() {
                         std::cout << "No file opened!" << std::endl;
                     else {
                         stringForWriting = readFromMemory(registers[2],registers[3]);
-                        // CHECK WHY THERE ARE ONLY 3 CHARACTERS HERE
                         char stringForWritingChar[3];
                         for (int i = 0; i < stringForWriting.length(); i++)
                             stringForWritingChar[i] = stringForWriting[i];
